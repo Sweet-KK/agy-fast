@@ -1550,7 +1550,7 @@ async function runConfig(opts) {
 
   if (!opts.quiet) {
     console.log(`agy-fast updater config (${cfgPath}):`);
-    console.log(`  - autoUpdate        : ${cfg.autoUpdate || "auto"}`);
+    console.log(`  - autoUpdate        : ${cfg.autoUpdate || "off"}`);
     console.log(`  - checkIntervalHours: ${cfg.checkIntervalHours || 4}`);
     console.log(`  - channel           : ${cfg.channel || "release"}`);
     console.log(`  - repoUrl           : ${cfg.repoUrl || "https://github.com/INK-Q/agy-fast.git"}`);

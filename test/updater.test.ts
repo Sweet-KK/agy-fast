@@ -17,6 +17,7 @@ import {
   pickLatestSemverTag,
   readInstalledVersion,
   readUpdateState,
+  resolveUpdaterSettings,
   runPluginUpdate,
   shouldTriggerBackgroundCheck,
   skipUpdateVersion,
@@ -30,6 +31,25 @@ import {
 const REPO_ROOT = process.cwd();
 const INSTALL_SCRIPT = path.join(REPO_ROOT, "scripts", "install.mjs");
 const UPDATER_DIST = path.join(REPO_ROOT, "dist", "updater.mjs");
+
+describe("fork update defaults", () => {
+  it("skips background checks on a fresh config without reaching the remote", async () => {
+    const home = await fs.mkdtemp(path.join(os.tmpdir(), "agy-fast-update-default-"));
+    try {
+      const env = { HOME: home, USERPROFILE: home, GEMINI_HOME: path.join(home, ".gemini") };
+      assert.equal((await resolveUpdaterSettings(env)).mode, "off");
+      const result = await runPluginUpdate({
+        pluginDir: path.join(home, "plugin"),
+        background: true,
+        env,
+        fetchFn: async () => assert.fail("background update reached the remote"),
+      });
+      assert.equal(result.status, "skipped-disabled");
+    } finally {
+      await fs.rm(home, { recursive: true, force: true });
+    }
+  });
+});
 
 describe("updater optional files", () => {
   it("includes README.zh-TW.md in the optional updater file set", () => {

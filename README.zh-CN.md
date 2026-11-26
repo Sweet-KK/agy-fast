@@ -261,7 +261,9 @@ node dist/benchmark.mjs compare --before ./before/transcript.jsonl --after ./aft
 
 > 在本地克隆目录中，也可直接使用 `./install.sh <子命令>`（macOS/Linux）或 `.\install.ps1 <子命令>`（Windows）执行上述全部子命令。
 
-### 零启动延迟的后台自动更新
+### 后台更新（本 fork 默认关闭）
+
+通过 Git 审查并选择性合入上游变更。插件默认不在后台检查或安装更新。若已有旧配置，设置 `AGY_FAST_AUTO_UPDATE=off` 可覆盖。
 
 - **0 ms 启动阻塞**：每 **4 小时**在 `SessionStart` 吐出快照*之后*，异步拉起完全分离的后台更新进程（`dist/updater.mjs`）。
 - **先验证、再原子替换**：优先通过 `git ls-remote --tags`（无 `git` 时回退 GitHub Releases API）检测新版本，克隆至隔离暂存目录并完成 **MCP 实时冒烟校验**后，再按文件原子替换；损坏版本会被自动拦截，且用户自定义的 `rules/AGENTS.local.md`（需带 `---\ntrigger: always_on\n---` YAML frontmatter 以便 Antigravity 加载，已加入 `.gitignore`）在自动更新与手动重装时均会被完整保留。
@@ -272,7 +274,7 @@ node dist/benchmark.mjs compare --before ./before/transcript.jsonl --after ./aft
 
 | 环境变量 | 可选值 / 默认值 | 说明 |
 | :--- | :--- | :--- |
-| `AGY_FAST_AUTO_UPDATE` | `auto` *（默认）* \| `notify` \| `off` | 覆盖已保存的自动更新模式 |
+| `AGY_FAST_AUTO_UPDATE` | `auto` \| `notify` \| `off` *（默认）* | 覆盖已保存的自动更新模式 |
 | `AGY_FAST_UPDATE_INTERVAL_HOURS` | `12` *（默认；`1..720`）* | 后台检查间隔（小时） |
 | `AGY_FAST_UPDATE_CHANNEL` | `release` *（默认）* \| `main` | 跟踪稳定发版标签或 `main` 分支 |
 | `AGY_FAST_REPO` | Git 仓库地址 | 自定义镜像或 Fork 仓库地址 |

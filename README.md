@@ -263,7 +263,9 @@ node dist/benchmark.mjs compare --before ./run-before/transcript.jsonl --after .
 
 > From a local repository clone, `./install.sh <command>` (macOS/Linux) and `.\install.ps1 <command>` (Windows) accept the same subcommands (`doctor`, `update`, `config`, `uninstall`).
 
-### Zero-Latency Background Auto-Updater
+### Background updater (off by default in this fork)
+
+Use Git to review and selectively merge upstream changes. By default the plugin neither checks for nor installs updates in the background. Set `AGY_FAST_AUTO_UPDATE=off` to override older saved settings.
 
 - **0 ms session startup cost:** Every **4 hours**, `SessionStart` spawns a detached background process (`dist/updater.mjs`) *after* emitting the workspace snapshot.
 - **Verified before swap:** Checks GitHub release tags (`git ls-remote --tags` with GitHub Releases API fallback), clones into an isolated staging directory, runs a **live MCP smoke test**, and atomically replaces runtime files—automatically rejecting broken releases while preserving any user-created `rules/AGENTS.local.md` (add `---\ntrigger: always_on\n---` YAML frontmatter so Antigravity loads it; gitignored for `git clone` installs).
@@ -274,7 +276,7 @@ node dist/benchmark.mjs compare --before ./run-before/transcript.jsonl --after .
 
 | Environment Variable | Values / Default | Purpose |
 | :--- | :--- | :--- |
-| `AGY_FAST_AUTO_UPDATE` | `auto` *(default)* \| `notify` \| `off` | Overrides saved auto-update mode |
+| `AGY_FAST_AUTO_UPDATE` | `auto` \| `notify` \| `off` *(default)* | Overrides saved auto-update mode |
 | `AGY_FAST_UPDATE_INTERVAL_HOURS` | `12` *(default; `1..720`)* | Background check interval in hours |
 | `AGY_FAST_UPDATE_CHANNEL` | `release` *(default)* \| `main` | Track stable semver release tags or `main` |
 | `AGY_FAST_REPO` | Git URL | Use a custom mirror or fork |

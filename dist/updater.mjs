@@ -534,7 +534,7 @@ async function resolveUpdaterSettings(env = process.env) {
   const cfg = await readUpdaterConfig(env);
   const envMode = parseAutoUpdateMode(env.AGY_FAST_AUTO_UPDATE);
   const cfgMode = parseAutoUpdateMode(cfg.autoUpdate);
-  const mode = envMode ?? cfgMode ?? "auto";
+  const mode = envMode ?? cfgMode ?? "off";
   const envHours = Number.parseFloat(env.AGY_FAST_UPDATE_INTERVAL_HOURS ?? "");
   const rawHours = Number.isFinite(envHours) && envHours >= 0.01 ? envHours : typeof cfg.checkIntervalHours === "number" && cfg.checkIntervalHours >= 0.01 ? cfg.checkIntervalHours : DEFAULT_CHECK_INTERVAL_HOURS;
   const checkIntervalHours = Math.max(0.01, Math.min(24 * 30, rawHours));

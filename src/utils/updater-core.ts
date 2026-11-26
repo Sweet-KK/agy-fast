@@ -376,7 +376,7 @@ export async function resolveUpdaterSettings(
   const cfg = await readUpdaterConfig(env);
   const envMode = parseAutoUpdateMode(env.AGY_FAST_AUTO_UPDATE);
   const cfgMode = parseAutoUpdateMode(cfg.autoUpdate);
-  const mode: AutoUpdateMode = envMode ?? cfgMode ?? "auto";
+  const mode: AutoUpdateMode = envMode ?? cfgMode ?? "off";
 
   const envHours = Number.parseFloat(env.AGY_FAST_UPDATE_INTERVAL_HOURS ?? "");
   const rawHours =
