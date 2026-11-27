@@ -91,7 +91,7 @@ describe("installer", () => {
     assert.match(docOut, /MCP server\s+: OK/);
     assert.match(docOut, /Host compat\s+: editsFormat=auto/);
     assert.match(docOut, /Version\s+: v\d+\.\d+\.\d+/);
-    assert.match(docOut, /Auto-update\s+: auto/);
+    assert.match(docOut, /Auto-update\s+: off/);
     const cfgOut = execFileSync(
       process.execPath,
       [INSTALL_SCRIPT, "config", "--edits-format", "string"],

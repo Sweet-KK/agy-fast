@@ -1181,7 +1181,7 @@ async function runDoctor(targetDir, quiet = false, doctorOpts = {}) {
   const effectiveAutoMode =
     process.env.AGY_FAST_AUTO_UPDATE?.trim().toLowerCase() ||
     updaterCfg.autoUpdate ||
-    "auto";
+    "off";
   const effectiveInterval =
     process.env.AGY_FAST_UPDATE_INTERVAL_HOURS?.trim() ||
     updaterCfg.checkIntervalHours ||
