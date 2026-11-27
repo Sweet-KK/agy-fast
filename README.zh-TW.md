@@ -11,6 +11,7 @@
 **面向 Google Antigravity 的合規延遲、Token 額度與工具呼叫加速外掛**
 
 [![版本](https://img.shields.io/github/v/tag/INK-Q/agy-fast?label=version&sort=semver&style=flat-square&color=38BDF8&labelColor=0F172A)](CHANGELOG.md)
+[![npm](https://img.shields.io/npm/v/agy-fast?style=flat-square&logo=npm&logoColor=white&color=CB3837&labelColor=0F172A)](https://www.npmjs.com/package/agy-fast)
 [![GitHub Stars](https://img.shields.io/github/stars/INK-Q/agy-fast?style=flat-square&color=FACC15&labelColor=0F172A)](https://github.com/INK-Q/agy-fast/stargazers)
 [![Node.js >= 20](https://img.shields.io/badge/node-%3E%3D20-22C55E?style=flat-square&logo=node.js&logoColor=white&labelColor=0F172A)](#快速開始)
 [![零執行階段依賴](https://img.shields.io/badge/runtime%20deps-0-38BDF8?style=flat-square&labelColor=0F172A)](#工作原理)
@@ -53,6 +54,11 @@ curl -fsSL https://raw.githubusercontent.com/INK-Q/agy-fast/main/install.sh | sh
 irm https://raw.githubusercontent.com/INK-Q/agy-fast/main/install.ps1 | iex
 ```
 
+**跨平台通用（透過 npm / `npx`）：**
+```bash
+npx -y agy-fast install
+```
+
 > [!TIP]
 > **Desktop 2.0 / IDE 啟用提示：** 開啟 Antigravity 側邊欄的 **Customizations → Installed**，確認 `agy-fast` 已處於開啟狀態，然後開啟一個**新工作階段**即可啟用啟動快照鉤子與 MCP 工具。
 >
@@ -65,7 +71,23 @@ irm https://raw.githubusercontent.com/INK-Q/agy-fast/main/install.ps1 | iex
 > *（該參數會自動批准所有工具權限請求且不再彈窗詢問，建議僅在受信任的程式碼儲存庫中使用，或配合 `--sandbox` 一起啟用。）*
 
 <details>
-<summary>更多安裝方式（本機複製、直接複製至外掛目錄、<code>agy</code> 官方 CLI、按專案團隊共享、讓 Antigravity 自動安裝）</summary>
+<summary>更多安裝方式（<code>npx</code> 獨立 MCP 服務、本機複製、直接複製至外掛目錄、<code>agy</code> 官方 CLI、按專案團隊共享、讓 Antigravity 自動安裝）</summary>
+
+#### 獨立純 MCP 服務（任意標準 MCP 用戶端）
+`agy-fast` 以 Antigravity 為一等公民（完整外掛含 `SessionStart` 鉤子、`rules/AGENTS.md` 與自動更新）；其他標準 MCP 用戶端也可透過 `npx` 直接掛載純 MCP Stdio 服務：
+
+```json
+{
+  "mcpServers": {
+    "agy-fast": {
+      "command": "npx",
+      "args": ["-y", "agy-fast", "mcp"]
+    }
+  }
+}
+```
+
+可選參數：傳入 `"--tools", "batch_search,quick_outline,run_checks"` 按需暴露工具子集，傳入 `"--schema-compat=minimal"` 配合嚴格 JSON Schema 子集宿主，或執行 `npx -y agy-fast mcp-config --rules` 輸出宿主無關的精簡路由規則。
 
 #### 本機複製安裝（跨平台通用）
 ```bash
@@ -256,7 +278,8 @@ node dist/benchmark.mjs compare --before ./before/transcript.jsonl --after ./aft
 | **配置自動更新策略** *（`auto` \| `notify` \| `off`）* | `node ~/.gemini/config/plugins/agy-fast/scripts/install.mjs config --auto-update notify --interval 24` |
 | **切換 MCP 工具載入模式** *（`eager` \| `lazy`，自動更新保留）* | `node ~/.gemini/config/plugins/agy-fast/scripts/install.mjs config --tool-loading lazy` |
 | **CLI 直調模式** *（供 Swarm Worker 及無 MCP 環境通過 `run_command` 呼叫）* | `node ~/.gemini/config/plugins/agy-fast/dist/mcp-server.mjs --cli <search\|outline\|slice\|edit\|check>` |
-| **獨立 MCP Stdio 服務** *（供標準 MCP 用戶端按需掛載；透傳 `--schema-compat=minimal` 等參數）* | `node ~/.gemini/config/plugins/agy-fast/scripts/install.mjs mcp` *（或 `agy-fast-mcp`）* |
+| **獨立 MCP Stdio 服務** *（供標準 MCP 用戶端掛載；透傳 `--tools`、`--schema-compat=minimal`、`--cli`）* | `npx -y agy-fast mcp` *（或 `node ~/.gemini/config/plugins/agy-fast/scripts/install.mjs mcp`）* |
+| **產生 MCP 設定 / 通用規則** *（`--host mcp-only\|json\|generic\|antigravity`、`--tools`、`--rules`）* | `npx -y agy-fast mcp-config --rules` *（或 `node .../scripts/install.mjs mcp-config`）* |
 | **一鍵乾淨解除安裝** | `node ~/.gemini/config/plugins/agy-fast/scripts/install.mjs uninstall` |
 
 > 在本機複製目錄中，也可直接使用 `./install.sh <子指令>`（macOS/Linux）或 `.\install.ps1 <子指令>`（Windows）執行上述全部子指令。
@@ -280,6 +303,7 @@ node dist/benchmark.mjs compare --before ./before/transcript.jsonl --after ./aft
 | `AGY_FAST_REPO` | Git 儲存庫網址 | 自訂鏡像或 Fork 儲存庫網址 |
 | `AGY_FAST_EDITS_FORMAT` | `auto` *（預設）* \| `array` \| `string` | 控制 `apply_edits.edits` 參數格式策略（`auto` 在支援 `"eager": true` 的 CLI ≥1.5.8、桌面版 2.0、IDE 與第三方用戶端統一走省 token 的強型別原生陣列，在舊版懶載入 CLI 1.5.0–1.5.7 自動切換為 JSON 陣列字串以防 `[]` 丟參；伺服器端一律相容兩種格式） |
 | `AGY_FAST_HOST` | 如 `cli@1.5.14`、`ide@2.7.0`、`desktop@2.34.0` | 手動覆蓋自動探測到的 Antigravity 宿主端型別與版本 |
+| `AGY_FAST_TOOLS` | 逗號分隔工具名 *（預設全部 5 個）* | 僅暴露指定的 MCP 工具子集（亦支援 `--tools <列表>`） |
 | `AGY_FAST_SCHEMA_COMPAT` | `standard` *（預設）* \| `minimal` | 從 `tools/list` 剝離數值/陣列範圍約束關鍵字（`minimum`/`maximum`/`minItems`/`maxItems`），配合嚴格 JSON Schema 子集宿主（亦支援 `--schema-compat=minimal`，執行期校驗不受影響） |
 
 **更新生效提示：** 新版 `rules/AGENTS.md` 與 `dist/session-start.mjs` 在下一次開啟新工作階段時自動生效；Antigravity Desktop 2.0 / IDE 若需立即重新整理常駐 MCP 伺服器，重新載入視窗或重啟一次即可。

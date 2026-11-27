@@ -11,6 +11,7 @@
 **Latency, Token-Quota & Tool-Call Accelerator Plugin for Google Antigravity**
 
 [![Version](https://img.shields.io/github/v/tag/INK-Q/agy-fast?label=version&sort=semver&style=flat-square&color=38BDF8&labelColor=0F172A)](CHANGELOG.md)
+[![npm](https://img.shields.io/npm/v/agy-fast?style=flat-square&logo=npm&logoColor=white&color=CB3837&labelColor=0F172A)](https://www.npmjs.com/package/agy-fast)
 [![GitHub Stars](https://img.shields.io/github/stars/INK-Q/agy-fast?style=flat-square&color=FACC15&labelColor=0F172A)](https://github.com/INK-Q/agy-fast/stargazers)
 [![Node.js >= 20](https://img.shields.io/badge/node-%3E%3D20-22C55E?style=flat-square&logo=node.js&logoColor=white&labelColor=0F172A)](#quick-start)
 [![Runtime Dependencies: 0](https://img.shields.io/badge/runtime%20deps-0-38BDF8?style=flat-square&labelColor=0F172A)](#how-it-works)
@@ -53,6 +54,11 @@ curl -fsSL https://raw.githubusercontent.com/INK-Q/agy-fast/main/install.sh | sh
 irm https://raw.githubusercontent.com/INK-Q/agy-fast/main/install.ps1 | iex
 ```
 
+**Any OS (via npm / `npx`):**
+```bash
+npx -y agy-fast install
+```
+
 > [!TIP]
 > **Activating in Desktop 2.0 / IDE:** Open **Customizations → Installed** in Antigravity, confirm `agy-fast` is enabled, and start a **new session** to load the `SessionStart` hook and MCP tools.
 >
@@ -65,7 +71,23 @@ irm https://raw.githubusercontent.com/INK-Q/agy-fast/main/install.ps1 | iex
 > *(Official `agy` flag that auto-approves all tool permission requests without prompting — use only in trusted repositories, or pair with `--sandbox`.)*
 
 <details>
-<summary>More installation options (local clone, direct git clone, <code>agy</code> CLI, per-repo team install, or ask Antigravity)</summary>
+<summary>More installation options (standalone MCP via <code>npx</code>, local clone, direct git clone, <code>agy</code> CLI, per-repo team install, or ask Antigravity)</summary>
+
+#### Standalone Pure MCP Server (Any Standard MCP Host)
+`agy-fast` is built Antigravity-first (full plugin with `SessionStart` hook, `rules/AGENTS.md`, and auto-updater). Standard third-party MCP hosts can also mount the pure MCP stdio server directly via `npx` (zero host-specific setup):
+
+```json
+{
+  "mcpServers": {
+    "agy-fast": {
+      "command": "npx",
+      "args": ["-y", "agy-fast", "mcp"]
+    }
+  }
+}
+```
+
+Optional flags: pass `"--tools", "batch_search,quick_outline,run_checks"` to expose a subset, `"--schema-compat=minimal"` for strict JSON Schema subset hosts, or run `npx -y agy-fast mcp-config --rules` to print host-agnostic routing rules.
 
 #### Local Clone (Any OS)
 ```bash
@@ -258,7 +280,8 @@ node dist/benchmark.mjs compare --before ./run-before/transcript.jsonl --after .
 | **Configure auto-update** *(`auto` \| `notify` \| `off`)* | `node ~/.gemini/config/plugins/agy-fast/scripts/install.mjs config --auto-update notify --interval 24` |
 | **Switch MCP tool loading** *(`eager` \| `lazy`, preserved across updates)* | `node ~/.gemini/config/plugins/agy-fast/scripts/install.mjs config --tool-loading lazy` |
 | **Direct CLI mode** *(for Swarm workers & non-MCP scripts)* | `node ~/.gemini/config/plugins/agy-fast/dist/mcp-server.mjs --cli <search\|outline\|slice\|edit\|check>` |
-| **Standalone MCP stdio server** *(standard MCP hosts; forwards flags like `--schema-compat=minimal`)* | `node ~/.gemini/config/plugins/agy-fast/scripts/install.mjs mcp` *(or `agy-fast-mcp`)* |
+| **Standalone MCP stdio server** *(standard MCP hosts; forwards `--tools`, `--schema-compat=minimal`, `--cli`)* | `npx -y agy-fast mcp` *(or `node ~/.gemini/config/plugins/agy-fast/scripts/install.mjs mcp`)* |
+| **Generate MCP config / generic rules** *(`--host mcp-only\|json\|generic\|antigravity`, `--tools`, `--rules`)* | `npx -y agy-fast mcp-config --rules` *(or `node .../scripts/install.mjs mcp-config`)* |
 | **Uninstall cleanly** | `node ~/.gemini/config/plugins/agy-fast/scripts/install.mjs uninstall` |
 
 > From a local repository clone, `./install.sh <command>` (macOS/Linux) and `.\install.ps1 <command>` (Windows) accept the same subcommands (`doctor`, `update`, `config`, `uninstall`).
@@ -282,6 +305,7 @@ Use Git to review and selectively merge upstream changes. By default the plugin 
 | `AGY_FAST_REPO` | Git URL | Use a custom mirror or fork |
 | `AGY_FAST_EDITS_FORMAT` | `auto` *(default)* \| `array` \| `string` | Controls `apply_edits.edits` schema (`auto` uses token-saving native arrays on eager-capable CLI ≥1.5.8, Desktop 2.0, IDE, and third-party hosts, and switches to JSON array strings on pre-eager CLI 1.5.0–1.5.7; server always accepts both) |
 | `AGY_FAST_HOST` | e.g. `cli@1.5.14`, `ide@2.7.0`, `desktop@2.34.0` | Overrides auto-detected Antigravity host surface & version |
+| `AGY_FAST_TOOLS` | Comma-separated tool names *(default: all 5)* | Exposes only the specified MCP tool subset (also `--tools <list>`) |
 | `AGY_FAST_SCHEMA_COMPAT` | `standard` *(default)* \| `minimal` | Strips numeric/array range keywords (`minimum`/`maximum`/`minItems`/`maxItems`) from `tools/list` for strict JSON Schema subset hosts (also `--schema-compat=minimal`; runtime validation stays unchanged) |
 
 **Applying updates:** Updated `rules/AGENTS.md` and `dist/session-start.mjs` take effect automatically on the next new session. In Antigravity Desktop 2.0 / IDE, reload or restart the window once to refresh the resident MCP server process.
